@@ -7,6 +7,7 @@ Sou um profissional de segurança pública com uma paixão profunda por tecnolog
 ### 🕵️‍♂️ Sobre mim
 
 * 🎓 Formado em **Ciência de Dados** pela UFMS em 2025. 
+* 📚 Especializando em **Tecnologias da Informação e Comunicação aplicadas à Segurança Pública** pela UFSC.
 * 👁️ Focado no desenvolvimento de sistemas de **Visão Computacional**, explorando ativamente soluções com YOLO, OpenCV e modelos de Deep Learning para OCR.
 * 🚔 Pretendo trazer a experiência do trabalho operacional da polícia para a engenharia de software, criando ferramentas que realmente funcionam no mundo real.
 
@@ -46,4 +47,4 @@ O sistema atuará em três pilares fundamentais da rotina carcerária:
 
 ### 📫 Como se conectar comigo
 
-<a href="mailto:edersonldn@gmail.com"><img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="E-mail"></a>
+<a href="mailto:edersonldn@gmail.com"><img src="
