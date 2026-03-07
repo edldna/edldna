@@ -47,4 +47,4 @@ O sistema atuará em três pilares fundamentais da rotina carcerária:
 
 ### 📫 Como se conectar comigo
 
-<a href="mailto:edersonldn@gmail.com"><img src="
+<a href="mailto:edersonldn@gmail.com"><img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="E-mail"></a>
