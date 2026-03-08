@@ -1,0 +1,83 @@
+# ============================================================
+# SuperGuard - Sistema de Segurança Inteligente para Supermercados
+# Docker Compose - 3 serviços: api, worker_cv, postgres
+# ============================================================
+
+version: "3.9"
+
+services:
+  # --- Banco de dados PostgreSQL ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: superguard_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-superguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-superguard123}
+      POSTGRES_DB: ${POSTGRES_DB:-superguard}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-superguard}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - superguard_net
+
+  # --- API FastAPI (painel web + autenticação + Telegram bot) ---
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: superguard_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-superguard}:${POSTGRES_PASSWORD:-superguard123}@postgres:5432/${POSTGRES_DB:-superguard}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./alerts:/app/alerts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - superguard_net
+
+  # --- Worker de Visão Computacional (YOLO + OpenCV) ---
+  worker_cv:
+    build:
+      context: .
+      dockerfile: Dockerfile.cv
+    container_name: superguard_worker_cv
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-superguard}:${POSTGRES_PASSWORD:-superguard123}@postgres:5432/${POSTGRES_DB:-superguard}
+    volumes:
+      - ./alerts:/app/alerts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - superguard_net
+    # Suporte a GPU (descomente se tiver NVIDIA GPU)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  postgres_data:
+
+networks:
+  superguard_net:
+    driver: bridge

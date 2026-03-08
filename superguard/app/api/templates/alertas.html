@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuperGuard - Histórico de Alertas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="/dashboard" class="text-gray-400 hover:text-white">← Dashboard</a>
+      <span class="text-gray-600">|</span>
+      <span class="text-xl font-bold">🚨 Histórico de Alertas</span>
+    </div>
+    <a href="/logout" class="text-red-400 hover:text-red-300 text-sm">Sair</a>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-6 py-8">
+
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">Alertas Registrados</h1>
+      <span class="text-gray-400 text-sm">Total: {{ total }}</span>
+    </div>
+
+    {% if alertas %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for alerta in alertas %}
+        <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+          {% if alerta.foto_path %}
+            <img
+              src="/alerts/{{ alerta.foto_path.split('/')[-1] }}"
+              alt="Frame do alerta"
+              class="w-full h-48 object-cover"
+              onerror="this.src=''; this.parentNode.querySelector('.no-img').style.display='flex'"
+            />
+          {% endif %}
+          <div class="no-img hidden bg-gray-700 h-48 items-center justify-center text-4xl">🎥</div>
+
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-bold">{{ alerta.camera_nome }}</h3>
+              <span class="bg-red-900 text-red-300 text-xs px-2 py-1 rounded font-bold">
+                {{ "%.0f"|format(alerta.confianca * 100) }}%
+              </span>
+            </div>
+            <p class="text-gray-400 text-sm">
+              🕐 {{ alerta.detectado_em.strftime('%d/%m/%Y às %H:%M:%S') }}
+            </p>
+            {% if alerta.descricao %}
+              <p class="text-gray-500 text-xs mt-2 line-clamp-2">{{ alerta.descricao }}</p>
+            {% endif %}
+            <div class="flex items-center gap-3 mt-3">
+              <span class="text-xs {{ 'text-blue-400' if alerta.telegram_enviado else 'text-gray-500' }}">
+                {{ '✈️ Telegram enviado' if alerta.telegram_enviado else '⏳ Não enviado' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Paginação -->
+      {% set total_paginas = ((total - 1) // por_pagina + 1) %}
+      {% if total_paginas > 1 %}
+      <div class="flex justify-center gap-3 mt-8">
+        {% if pagina > 1 %}
+          <a href="/alertas?pagina={{ pagina - 1 }}" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">
+            ← Anterior
+          </a>
+        {% endif %}
+        <span class="bg-blue-700 px-4 py-2 rounded">{{ pagina }} / {{ total_paginas }}</span>
+        {% if pagina < total_paginas %}
+          <a href="/alertas?pagina={{ pagina + 1 }}" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">
+            Próxima →
+          </a>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    {% else %}
+      <div class="text-center py-16">
+        <span class="text-6xl">✅</span>
+        <p class="text-2xl font-bold mt-4">Nenhum alerta registrado!</p>
+        <p class="text-gray-400 mt-2">O sistema está monitorando e nenhum evento suspeito foi detectado.</p>
+      </div>
+    {% endif %}
+
+  </div>
+</body>
+</html>

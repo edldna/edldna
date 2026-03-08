@@ -1,0 +1,39 @@
+# ============================================================
+# SuperGuard - Dependências Python 3.12
+# ============================================================
+
+# --- Framework Web ---
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+python-multipart==0.0.20
+aiofiles==24.1.0
+jinja2==3.1.4
+
+# --- Banco de dados ---
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+
+# --- Autenticação ---
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# --- Telegram Bot ---
+python-telegram-bot==21.9
+
+# --- Visão Computacional ---
+ultralytics==8.3.55       # YOLOv11 (mais recente da Ultralytics)
+opencv-python-headless==4.10.0.84
+supervision==0.24.0       # ByteTracker para rastreamento
+numpy==1.26.4
+
+# --- Utilitários ---
+httpx==0.28.1
+pydantic-settings==2.7.0
+python-dotenv==1.0.1
+loguru==0.7.3
+
+# --- Testes ---
+pytest==8.3.4
+pytest-asyncio==0.24.0
+pytest-mock==3.14.0

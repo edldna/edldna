@@ -1,0 +1,30 @@
+# ============================================================
+# SuperGuard - Dockerfile para API FastAPI + Telegram Bot
+# ============================================================
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Instala dependências do sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev gcc && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copia e instala dependências Python (somente as da API)
+COPY requirements.txt .
+RUN pip install --no-cache-dir \
+    fastapi uvicorn[standard] sqlalchemy[asyncio] asyncpg alembic \
+    "python-telegram-bot[webhooks]>=21.0" \
+    python-jose[cryptography] passlib[bcrypt] python-multipart \
+    aiofiles jinja2 httpx pydantic-settings psycopg2-binary
+
+# Copia código-fonte
+COPY app/ ./app/
+COPY alembic/ ./alembic/
+COPY alembic.ini .
+
+# Cria pasta de alertas
+RUN mkdir -p /app/alerts
+
+# Roda migrações e inicia o servidor
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.api.main:app --host 0.0.0.0 --port 8000"]

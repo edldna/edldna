@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuperGuard - Gerenciar Usuários</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="/dashboard" class="text-gray-400 hover:text-white">← Dashboard</a>
+      <span class="text-gray-600">|</span>
+      <span class="text-xl font-bold">👥 Gerenciar Usuários</span>
+    </div>
+    <a href="/logout" class="text-red-400 hover:text-red-300 text-sm">Sair</a>
+  </nav>
+
+  <div class="max-w-5xl mx-auto px-6 py-8">
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+      <!-- Adicionar usuário -->
+      <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+        <h2 class="text-lg font-bold mb-4">➕ Adicionar Usuário</h2>
+        <form
+          hx-post="/api/usuarios"
+          hx-headers='{"Authorization": "Bearer " + localStorage.getItem("token")}'
+          hx-target="#msg-usuario"
+          class="space-y-4"
+        >
+          <div>
+            <label class="block text-sm text-gray-300 mb-1">Chat ID do Telegram</label>
+            <input name="chat_id" type="text" placeholder="Ex: 123456789"
+              class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm" required />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-300 mb-1">Nome Completo</label>
+            <input name="nome" type="text" placeholder="João Silva"
+              class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm" required />
+          </div>
+          <div>
+            <label class="block text-sm text-gray-300 mb-1">Função</label>
+            <select name="role" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm">
+              <option value="seguranca">Segurança</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-gray-300 mb-1">Senha (painel web)</label>
+            <input name="senha" type="password" placeholder="Opcional"
+              class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-sm" />
+          </div>
+          <button type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded text-sm font-bold transition">
+            Adicionar Usuário
+          </button>
+        </form>
+        <div id="msg-usuario" class="mt-3 text-sm text-green-400"></div>
+      </div>
+
+      <!-- Lista de câmeras -->
+      <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+        <h2 class="text-lg font-bold mb-4">📹 Câmeras</h2>
+        {% if cameras %}
+          <div class="space-y-2">
+            {% for cam in cameras %}
+            <div class="flex items-center justify-between bg-gray-700 rounded px-4 py-2">
+              <div>
+                <p class="text-sm font-medium">{{ cam.nome }}</p>
+                {% if cam.localizacao %}
+                  <p class="text-gray-400 text-xs">{{ cam.localizacao }}</p>
+                {% endif %}
+              </div>
+              <div class="flex items-center gap-2">
+                {% if cam.ativa %}
+                  <span class="text-green-400 text-xs">🟢 Ativa</span>
+                {% else %}
+                  <span class="text-red-400 text-xs">🔴 Inativa</span>
+                {% endif %}
+                <button
+                  hx-patch="/api/cameras/{{ cam.id }}/toggle"
+                  hx-swap="none"
+                  hx-on="htmx:afterRequest: location.reload()"
+                  class="text-xs bg-gray-600 hover:bg-gray-500 px-2 py-1 rounded"
+                >Toggle</button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-gray-400 text-sm">Nenhuma câmera cadastrada.</p>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- Lista de usuários -->
+    <div class="bg-gray-800 rounded-xl border border-gray-700 p-6 mt-8">
+      <h2 class="text-lg font-bold mb-4">👥 Usuários Cadastrados ({{ usuarios|length }})</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-gray-400 border-b border-gray-700">
+              <th class="text-left py-2 px-3">Nome</th>
+              <th class="text-left py-2 px-3">Chat ID</th>
+              <th class="text-left py-2 px-3">Função</th>
+              <th class="text-left py-2 px-3">Status</th>
+              <th class="text-left py-2 px-3">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in usuarios %}
+            <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
+              <td class="py-3 px-3">
+                {{ u.nome }}
+                {% if u.username %}<span class="text-gray-400 text-xs">@{{ u.username }}</span>{% endif %}
+              </td>
+              <td class="py-3 px-3 font-mono text-xs text-gray-400">{{ u.chat_id }}</td>
+              <td class="py-3 px-3">
+                {% if u.role.value == "admin" %}
+                  <span class="bg-yellow-700 text-yellow-200 text-xs px-2 py-1 rounded">👑 Admin</span>
+                {% else %}
+                  <span class="bg-blue-900 text-blue-300 text-xs px-2 py-1 rounded">🔒 Segurança</span>
+                {% endif %}
+              </td>
+              <td class="py-3 px-3">
+                {% if u.ativo %}
+                  <span class="text-green-400">✅ Ativo</span>
+                {% else %}
+                  <span class="text-red-400">❌ Inativo</span>
+                {% endif %}
+              </td>
+              <td class="py-3 px-3">
+                <button
+                  hx-patch="/api/usuarios/{{ u.id }}/toggle"
+                  hx-swap="none"
+                  hx-on="htmx:afterRequest: location.reload()"
+                  class="text-xs bg-gray-600 hover:bg-gray-500 px-2 py-1 rounded mr-1"
+                >Toggle</button>
+                <button
+                  hx-delete="/api/usuarios/{{ u.id }}"
+                  hx-swap="none"
+                  hx-confirm="Tem certeza que deseja remover {{ u.nome }}?"
+                  hx-on="htmx:afterRequest: location.reload()"
+                  class="text-xs bg-red-800 hover:bg-red-700 px-2 py-1 rounded"
+                >Remover</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

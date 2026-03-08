@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuperGuard - Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <meta http-equiv="refresh" content="30"><!-- Auto-atualiza a cada 30s -->
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl">🛡️</span>
+      <span class="text-xl font-bold">SuperGuard</span>
+      <span class="text-gray-400 text-sm">| Painel de Monitoramento</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <span class="text-gray-300 text-sm">👤 {{ usuario.sub }}</span>
+      {% if usuario.role == "admin" %}
+        <span class="bg-yellow-600 text-xs font-bold px-2 py-1 rounded">ADMIN</span>
+      {% endif %}
+      <a href="/logout" class="text-red-400 hover:text-red-300 text-sm">Sair</a>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Cards de estatísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-400 text-sm">Câmeras Ativas</p>
+            <p class="text-4xl font-bold text-green-400 mt-1">{{ total_cameras }}</p>
+          </div>
+          <span class="text-4xl">📹</span>
+        </div>
+      </div>
+
+      <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-400 text-sm">Total de Alertas</p>
+            <p class="text-4xl font-bold text-red-400 mt-1">{{ total_alertas }}</p>
+          </div>
+          <span class="text-4xl">🚨</span>
+        </div>
+      </div>
+
+      <div class="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-400 text-sm">Sistema</p>
+            <p class="text-lg font-bold text-blue-400 mt-1">✅ Operacional</p>
+          </div>
+          <span class="text-4xl">🟢</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+      <!-- Câmeras -->
+      <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">📹 Câmeras</h2>
+        {% if cameras %}
+          <div class="space-y-3">
+            {% for cam in cameras %}
+            <div class="flex items-center justify-between bg-gray-700 rounded-lg px-4 py-3">
+              <div>
+                <p class="font-medium">{{ cam.nome }}</p>
+                {% if cam.localizacao %}
+                  <p class="text-gray-400 text-xs">📍 {{ cam.localizacao }}</p>
+                {% endif %}
+              </div>
+              <div class="flex items-center gap-2">
+                {% if cam.ativa %}
+                  <span class="bg-green-900 text-green-300 text-xs px-2 py-1 rounded">🟢 Ativa</span>
+                {% else %}
+                  <span class="bg-red-900 text-red-300 text-xs px-2 py-1 rounded">🔴 Inativa</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-gray-400">Nenhuma câmera cadastrada.</p>
+        {% endif %}
+        {% if usuario.role == "admin" %}
+          <a href="/usuarios" class="mt-4 inline-block text-blue-400 hover:text-blue-300 text-sm">
+            ⚙️ Gerenciar câmeras e usuários →
+          </a>
+        {% endif %}
+      </div>
+
+      <!-- Alertas recentes -->
+      <div class="bg-gray-800 rounded-xl border border-gray-700 p-6">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+          🚨 Alertas Recentes
+          <a href="/alertas" class="text-blue-400 text-sm font-normal ml-auto">Ver todos →</a>
+        </h2>
+        {% if alertas_recentes %}
+          <div class="space-y-3 max-h-96 overflow-y-auto">
+            {% for alerta in alertas_recentes %}
+            <div class="flex gap-3 bg-gray-700 rounded-lg p-3">
+              {% if alerta.foto_path %}
+                <img
+                  src="/alerts/{{ alerta.foto_path | replace(settings_alerts_dir ~ '/', '') }}"
+                  alt="Alerta"
+                  class="w-20 h-14 object-cover rounded"
+                  onerror="this.style.display='none'"
+                />
+              {% else %}
+                <div class="w-20 h-14 bg-gray-600 rounded flex items-center justify-center text-2xl">🎥</div>
+              {% endif %}
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-sm truncate">{{ alerta.camera_nome }}</p>
+                <p class="text-red-400 text-xs">Confiança: {{ "%.0f"|format(alerta.confianca * 100) }}%</p>
+                <p class="text-gray-400 text-xs">{{ alerta.detectado_em.strftime('%d/%m/%Y %H:%M') }}</p>
+              </div>
+              {% if alerta.telegram_enviado %}
+                <span class="text-blue-400 text-xs self-center">✈️</span>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-8">
+            <span class="text-4xl">✅</span>
+            <p class="text-gray-400 mt-2">Nenhum alerta registrado ainda.</p>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="text-center text-gray-600 text-xs py-6">
+    SuperGuard v1.0 — Sistema de Segurança Inteligente para Supermercados
+    | Atualização automática a cada 30s
+  </footer>
+</body>
+</html>

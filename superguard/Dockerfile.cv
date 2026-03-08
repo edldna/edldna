@@ -1,0 +1,26 @@
+# ============================================================
+# SuperGuard - Dockerfile para Worker de Visão Computacional
+# ============================================================
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Instala dependências do sistema necessárias para OpenCV e YOLO
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev gcc g++ \
+    libglib2.0-0 libsm6 libxrender1 libxext6 libgl1 \
+    ffmpeg libavcodec-dev libavformat-dev libswscale-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copia e instala dependências Python completas
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copia código-fonte
+COPY app/ ./app/
+
+# Cria pasta de alertas
+RUN mkdir -p /app/alerts
+
+# Inicia o worker de CV
+CMD ["python", "-m", "app.cv.main"]
