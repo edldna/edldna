@@ -16,6 +16,7 @@
 8. [API REST](#api-rest)
 9. [Treinamento/Fine-tuning do Modelo](#treinamentofine-tuning-do-modelo)
 10. [Suposições e Decisões de Design](#suposições-e-decisões-de-design)
+11. [⚙️ Abrindo o Projeto no PyCharm](#️-abrindo-o-projeto-no-pycharm)
 
 ---
 
@@ -451,3 +452,264 @@ detector = DetectorFurto(
 ---
 
 *SuperGuard v1.0 — Desenvolvido com Python 3.12, FastAPI, Ultralytics YOLO e python-telegram-bot*
+
+---
+
+## ⚙️ Abrindo o Projeto no PyCharm
+
+Esta seção explica, passo a passo, como clonar e configurar o **SuperGuard** no **PyCharm Community** ou **Professional** (versões 2023.x ou superior).
+
+### Pré-requisitos locais
+
+| Ferramenta | Versão mínima | Download |
+|------------|--------------|---------|
+| Python | 3.12 | [python.org](https://www.python.org/downloads/) |
+| PyCharm | 2023.1 | [jetbrains.com/pycharm](https://www.jetbrains.com/pycharm/download/) |
+| Git | Qualquer | [git-scm.com](https://git-scm.com/) |
+| Docker Desktop *(opcional)* | 24+ | [docker.com](https://www.docker.com/products/docker-desktop/) |
+
+> **Nota:** O PostgreSQL e os serviços Docker são **opcionais** para desenvolver e testar localmente.
+> Os testes unitários não precisam de banco nem de câmera.
+
+---
+
+### Passo 1 — Clonar o repositório
+
+**Opção A — via PyCharm (VCS integrado)**
+
+1. Abra o PyCharm
+2. Na tela de boas-vindas clique em **Get from VCS**
+   (ou no menu: **File → New Project from Version Control**)
+3. Cole a URL do repositório:
+   ```
+   https://github.com/edldna/edldna.git
+   ```
+4. Escolha o diretório local (ex: `C:\Projetos\edldna` ou `~/projetos/edldna`)
+5. Clique em **Clone**
+
+**Opção B — via terminal Git**
+
+```bash
+# Clona o repositório na pasta de sua preferência
+git clone https://github.com/edldna/edldna.git
+cd edldna
+```
+
+---
+
+### Passo 2 — Abrir a pasta `superguard` no PyCharm
+
+O projeto SuperGuard fica dentro da subpasta `superguard/`.
+Precisamos dizer ao PyCharm que **essa** é a raiz do projeto Python.
+
+1. No PyCharm, vá em **File → Open...**
+2. Navegue até a pasta clonada e selecione a subpasta **`superguard`**
+3. Clique em **OK** → se perguntado "Open in New Window?", escolha **New Window** (ou **This Window**)
+
+> O PyCharm detectará automaticamente o arquivo `pyproject.toml` na raiz de `superguard/`
+> e reconhecerá o projeto como Python.
+
+---
+
+### Passo 3 — Criar e configurar o ambiente virtual (venv)
+
+1. Vá em **File → Settings** (Windows/Linux) ou **PyCharm → Preferences** (macOS)
+2. Navegue até **Project: superguard → Python Interpreter**
+3. Clique no ícone de engrenagem ⚙️ → **Add Interpreter → Add Local Interpreter...**
+4. Selecione **Virtualenv Environment**
+   - Location: `superguard/.venv` (ou outro caminho de sua preferência)
+   - Base Interpreter: selecione **Python 3.12**
+5. Marque **"Inherit global site-packages"** apenas se quiser herdar pacotes globais
+6. Clique em **OK**
+
+---
+
+### Passo 4 — Instalar as dependências
+
+Abra o **Terminal integrado** do PyCharm (**View → Tool Windows → Terminal** ou `Alt+F12`):
+
+```bash
+# Ativa o ambiente virtual (se não estiver ativado automaticamente)
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
+
+# Instala todas as dependências do projeto
+pip install -r requirements.txt
+
+# Ou instala via pyproject.toml (inclui deps de desenvolvimento como pytest):
+pip install -e ".[dev]"
+```
+
+> 💡 O PyCharm mostrará uma notificação no topo do editor oferecendo instalar
+> automaticamente os pacotes — clique em **Install** para usar essa facilidade.
+
+---
+
+### Passo 5 — Configurar o arquivo `.env`
+
+O projeto usa variáveis de ambiente. Crie seu `.env` a partir do exemplo:
+
+```bash
+# No terminal do PyCharm:
+cp .env.example .env
+```
+
+Edite o arquivo `.env` diretamente no PyCharm e preencha pelo menos:
+
+```env
+TELEGRAM_BOT_TOKEN=SEU_TOKEN_AQUI
+TELEGRAM_ADMIN_CHAT_ID=SEU_CHAT_ID
+POSTGRES_PASSWORD=uma_senha_segura
+SECRET_KEY=chave_aleatoria_de_32_chars
+CAMERA_URLS=rtsp://192.168.1.100:554/stream
+```
+
+> 💡 Para gerar `SECRET_KEY`, use o terminal integrado:
+> ```bash
+> python -c "import secrets; print(secrets.token_hex(32))"
+> ```
+
+---
+
+### Passo 6 — Configurar o Test Runner (pytest)
+
+O PyCharm detecta automaticamente o `pytest` configurado em `pyproject.toml`.
+Para confirmar:
+
+1. **File → Settings → Tools → Python Integrated Tools**
+2. **Default test runner**: selecione **pytest**
+3. **Working directory**: certifique-se de apontar para `superguard/`
+4. Clique em **OK**
+
+Para rodar os testes:
+- Abra qualquer arquivo `tests/test_*.py`
+- Clique no ícone ▶ verde ao lado de qualquer função de teste
+- Ou clique com botão direito na pasta `tests/` → **Run 'pytest in tests'**
+
+Todos os **21 testes** devem passar sem precisar de câmera, banco ou Telegram:
+
+```
+tests/test_detector.py       9 testes ✅
+tests/test_tracker.py        7 testes ✅
+tests/test_telegram_mock.py  5 testes ✅
+```
+
+---
+
+### Passo 7 — Executar a API localmente (sem Docker)
+
+Para rodar a API FastAPI direto no PyCharm:
+
+1. Vá em **Run → Edit Configurations...**
+2. Clique no **+** → **Python**
+3. Configure:
+   - **Name**: `SuperGuard API`
+   - **Module name**: `uvicorn`
+   - **Parameters**: `app.api.main:app --reload --host 0.0.0.0 --port 8000`
+   - **Working directory**: selecione a pasta `superguard/`
+   - **Environment variables**: marque **"Load .env file"** ou adicione as variáveis manualmente
+4. Clique em **OK** e pressione ▶ para iniciar
+
+A API estará disponível em: **http://localhost:8000**
+Documentação interativa: **http://localhost:8000/docs**
+
+---
+
+### Passo 8 — Executar os Workers (CV e Bot Telegram)
+
+**Worker de Visão Computacional:**
+
+1. **Run → Edit Configurations... → +  → Python**
+2. Configure:
+   - **Name**: `SuperGuard CV Worker`
+   - **Module name**: `app.cv.main`
+   - **Working directory**: pasta `superguard/`
+3. Salve e execute com ▶
+
+**Bot Telegram (modo polling):**
+
+O bot sobe automaticamente junto com a API (veja `app/api/main.py`, função `lifespan`).
+Para rodá-lo de forma independente:
+
+1. **Run → Edit Configurations... → + → Python**
+2. Configure:
+   - **Name**: `SuperGuard Bot`
+   - **Module name**: `app.bot.telegram_bot`
+   - **Working directory**: pasta `superguard/`
+3. Execute com ▶
+
+---
+
+### Passo 9 — Subir tudo com Docker (recomendado para produção)
+
+Se preferir usar o Docker Compose diretamente pelo PyCharm:
+
+1. Instale o plugin **Docker** (caso não esteja instalado):
+   **File → Settings → Plugins** → busque "Docker" → **Install**
+2. Certifique-se de que o **Docker Desktop** está rodando
+3. Abra o arquivo `docker-compose.yml` no PyCharm
+4. Clique no ícone ▶▶ (duplo play) ao lado de `services:` para subir todos os serviços
+
+Ou pelo terminal integrado:
+```bash
+# Na pasta superguard/
+docker compose up --build
+```
+
+---
+
+### Estrutura de Run Configurations recomendada no PyCharm
+
+```
+Run/Debug Configurations
+├── 🟢 SuperGuard API          (uvicorn app.api.main:app --reload)
+├── 🟢 SuperGuard CV Worker    (python -m app.cv.main)
+├── 🟢 SuperGuard Bot          (python -m app.bot.telegram_bot)
+└── 🧪 pytest (tests/)         (pytest tests/ -v)
+```
+
+---
+
+### Dicas extras do PyCharm para este projeto
+
+| Recurso | Como acessar |
+|---------|-------------|
+| Completar código FastAPI | Instale o plugin **FastAPI** em Settings → Plugins |
+| Inspecionar modelos SQLAlchemy | **Database** tool window → conecte com as credenciais do `.env` |
+| Ver logs em tempo real | **Run** tool window → aba **Console** |
+| Debugar com breakpoints | Clique na margem esquerda do editor → ícone 🐛 (Debug) em vez de ▶ |
+| Formatar código automaticamente | `Ctrl+Alt+L` (Windows/Linux) ou `⌥⌘L` (macOS) |
+| Busca global | `Shift+Shift` (Search Everywhere) |
+| Estrutura do projeto | `Alt+1` abre o painel **Project** |
+| Verificação de tipos | Instale o plugin **Mypy** e aponte para `superguard/` |
+
+---
+
+### Problemas comuns
+
+**Erro: `ModuleNotFoundError: No module named 'app'`**
+> O diretório de trabalho está errado. Verifique em Run Configuration → **Working directory** → deve apontar para `superguard/`.
+
+**Erro: `ModuleNotFoundError: No module named 'ultralytics'`**
+> As dependências não foram instaladas. Rode `pip install -r requirements.txt` no terminal integrado com o venv ativado.
+
+**PyCharm não encontra o intérprete**
+> Vá em **File → Settings → Python Interpreter** e selecione manualmente `.venv/bin/python` (Linux/Mac) ou `.venv\Scripts\python.exe` (Windows).
+
+**Erro de banco de dados ao subir a API sem Docker**
+> Sem o PostgreSQL rodando localmente, a API não conectará ao banco.
+> Para testar somente os endpoints, suba o postgres via Docker:
+> ```bash
+> docker compose up postgres -d
+> ```
+> E rode a API diretamente no PyCharm.
+
+**Bot Telegram não conecta**
+> Verifique se `TELEGRAM_BOT_TOKEN` está correto no `.env`.
+> Teste com:
+> ```bash
+> curl https://api.telegram.org/bot<SEU_TOKEN>/getMe
+> ```
+
