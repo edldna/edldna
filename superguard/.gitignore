@@ -63,3 +63,35 @@ logs/
 
 # Windows
 Thumbs.db
+
+# Runtime / filas / estado local
+alerts/
+!alerts/.gitkeep
+alerts/model_reload.flag
+eval_buffer/
+train_frames/
+train_pipeline/
+models/
+
+# Jobs e saídas de treino/validação
+yt_frames/
+yt_frames_done/
+yt_dataset/
+yt_dataset_merged/
+train_urls.txt
+runs/
+
+# Artefatos temporários e cache
+*.tmp
+*.temp
+frame.jpg
+superguard.egg-info/
+
+# Credenciais e chaves
+*.pem
+*.key
+*.crt
+*.p12
+
+# Sistema operacional
+*.bak
