@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SuperGuard - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 min-h-screen flex items-center justify-center">
+  <div class="bg-gray-800 rounded-2xl shadow-2xl p-10 w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="text-5xl mb-3">🛡️</div>
+      <h1 class="text-3xl font-bold text-white">SuperGuard</h1>
+      <p class="text-gray-400 mt-2">Sistema de Segurança Inteligente</p>
+    </div>
+
+    {% if erro %}
+    <div class="bg-red-900/50 border border-red-500 text-red-300 rounded-lg px-4 py-3 mb-6">
+      ⚠️ {{ erro }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="/login" class="space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Chat ID do Telegram</label>
+        <input
+          type="text"
+          name="chat_id"
+          placeholder="Ex: 123456789"
+          required
+          class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Senha</label>
+        <input
+          type="password"
+          name="senha"
+          placeholder="••••••••"
+          required
+          class="w-full bg-gray-700 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition"
+      >
+        Entrar
+      </button>
+    </form>
+
+    <p class="text-center text-gray-500 mt-6 text-sm">
+      Não tem acesso? Fale com o administrador via Telegram.
+    </p>
+  </div>
+</body>
+</html>

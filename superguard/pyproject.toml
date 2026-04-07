@@ -1,0 +1,101 @@
+# ============================================================
+# SuperGuard - pyproject.toml
+# Arquivo de configuração do projeto (PEP 518 / PEP 621)
+# PyCharm, VS Code e outras IDEs usam este arquivo para
+# auto-detectar: intérprete Python, configurações de teste,
+# formatação e verificação de código.
+# ============================================================
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+# ── Metadados do projeto ──────────────────────────────────────────────────────
+
+[project]
+name = "superguard"
+version = "1.0.0"
+description = "Sistema de segurança inteligente para supermercados com detecção de furtos em tempo real via YOLO, FastAPI e Telegram"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+  { name = "Ederson dos Santos", email = "edersonldn@gmail.com" },
+]
+keywords = ["security", "yolo", "computer-vision", "fastapi", "telegram", "surveillance"]
+
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "python-multipart>=0.0.20",
+  "jinja2>=3.1.4",
+  "sqlalchemy[asyncio]>=2.0.36",
+  "asyncpg>=0.30.0",
+  "alembic>=1.14.0",
+  "python-jose[cryptography]>=3.3.0",
+  "passlib[bcrypt]>=1.7.4",
+  "python-telegram-bot>=21.9",
+  "ultralytics>=8.3.0",
+  "opencv-python-headless>=4.10.0",
+  "supervision>=0.24.0",
+  "numpy>=1.26.4",
+  "httpx>=0.28.0",
+  "pydantic-settings>=2.7.0",
+  "python-dotenv>=1.0.0",
+  "loguru>=0.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.24.0",
+  "pytest-mock>=3.14.0",
+]
+
+# ── Pytest ────────────────────────────────────────────────────────────────────
+# PyCharm lê esta seção automaticamente ao configurar o test runner.
+
+[tool.pytest.ini_options]
+asyncio_mode    = "auto"
+testpaths       = ["tests"]
+
+# ── Ruff (linter/formatador moderno, reconhecido pelo PyCharm via plugin) ─────
+
+[tool.ruff]
+target-version = "py312"
+line-length    = 100
+exclude = [
+  ".git", "__pycache__", ".venv", "venv",
+  "alembic/versions", "dist", "build",
+]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "UP",  # pyupgrade
+  "B",   # bugbear
+]
+ignore = [
+  "B008",  # do not perform function calls in argument defaults (FastAPI Depends)
+  "UP007", # use X | Y instead of Optional — compatibility with FastAPI
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+# ── Mypy (verificação de tipos, reconhecido pelo PyCharm como type checker) ───
+
+[tool.mypy]
+python_version         = "3.12"
+strict                 = false
+ignore_missing_imports = true
+exclude                = ["alembic/", "tests/"]
+
+# ── Setuptools (descoberta automática de pacotes) ─────────────────────────────
+
+[tool.setuptools.packages.find]
+where   = ["."]
+include = ["app*"]
